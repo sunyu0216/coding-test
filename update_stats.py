@@ -4,13 +4,23 @@ from datetime import datetime
 USERNAME = "sunyu0216"  # Solved.ac 아이디
 README_PATH = "README.md"
 
+# 숫자 티어 → 이름 매핑
+TIER_MAPPING = [
+    "Unrated", "Bronze V", "Bronze IV", "Bronze III", "Bronze II", "Bronze I",
+    "Silver V", "Silver IV", "Silver III", "Silver II", "Silver I",
+    "Gold V", "Gold IV", "Gold III", "Gold II", "Gold I",
+    "Platinum V", "Platinum IV", "Platinum III", "Platinum II", "Platinum I",
+    "Diamond V", "Diamond IV", "Diamond III", "Diamond II", "Diamond I",
+    "Ruby V", "Ruby IV", "Ruby III", "Ruby II", "Ruby I"
+]
+
 def fetch_stats():
     url = f"https://solved.ac/api/v3/user/show?handle={USERNAME}"
     res = requests.get(url)
     data = res.json()
     return {
         "solved": data["solvedCount"],
-        "tier": data["tier"]["name"],
+        "tier": TIER_MAPPING[data["tier"]],
         "rating": data["rating"],
         "rank": data["rank"]
     }
