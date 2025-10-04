@@ -1,0 +1,32 @@
+name: Update Stats
+
+on:
+    schedule:
+        - cron: "0 15 * * *" # UTC 15시 = 한국시간 자정
+    workflow_dispatch: # 수동 실행도 가능
+
+jobs:
+    update:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Install dependencies
+              run: pip install requests
+
+            - name: Run update script
+              run: python scripts/update_readme.py
+
+            - name: Commit and push if changed
+              run: |
+                  git config --global user.name "github-actions"
+                  git config --global user.email "actions@github.com"
+                  git add README.md
+                  git commit -m "chore: auto update stats" || exit 0
+                  git push
