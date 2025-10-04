@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 
 USERNAME_BOJ = "sunyu0216"      # 백준/solved.ac 아이디
-USERNAME_PROG = "박선유"     # 프로그래머스 닉네임
+USERNAME_PROG = "sunyu0216@naver.com"     # 프로그래머스 닉네임
 README_PATH = "README.md"
 
 # 백준 티어 숫자 -> 이름 매핑
