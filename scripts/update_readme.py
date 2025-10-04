@@ -4,13 +4,52 @@ from datetime import datetime
 USERNAME = "sunyu0216"  # solved.ac 아이디
 README_PATH = "README.md"
 
+# 숫자 티어를 이름으로 매핑
+TIER_NAMES = [
+    "Unrated",        # 0
+    "Bronze V",       # 1
+    "Bronze IV",      # 2
+    "Bronze III",     # 3
+    "Bronze II",      # 4
+    "Bronze I",       # 5
+    "Silver V",       # 6
+    "Silver IV",      # 7
+    "Silver III",     # 8
+    "Silver II",      # 9
+    "Silver I",       # 10
+    "Gold V",         # 11
+    "Gold IV",        # 12
+    "Gold III",       # 13
+    "Gold II",        # 14
+    "Gold I",         # 15
+    "Platinum V",     # 16
+    "Platinum IV",    # 17
+    "Platinum III",   # 18
+    "Platinum II",    # 19
+    "Platinum I",     # 20
+    "Diamond V",      # 21
+    "Diamond IV",     # 22
+    "Diamond III",    # 23
+    "Diamond II",     # 24
+    "Diamond I",      # 25
+    "Ruby V",         # 26
+    "Ruby IV",        # 27
+    "Ruby III",       # 28
+    "Ruby II",        # 29
+    "Ruby I"          # 30
+]
+
 def fetch_stats():
-    url = f"https://solved.ac/api/v3/user/show?handle=sunyu0216"
+    url = f"https://solved.ac/api/v3/user/show?handle={USERNAME}"
     res = requests.get(url)
     data = res.json()
+    
+    tier_number = data["tier"]
+    tier_name = TIER_NAMES[tier_number] if tier_number < len(TIER_NAMES) else "Unrated"
+
     return {
         "solved": data["solvedCount"],
-        "tier": data["tier"],
+        "tier": tier_name,
         "rating": data["rating"],
         "rank": data["rank"]
     }
