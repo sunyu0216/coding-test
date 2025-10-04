@@ -36,7 +36,11 @@ def update_readme(stats):
         parts = content.split(start_boj)
         before = parts[0]
         after = parts[1].split(end_boj)[1]
-        new_boj = f"| {datetime.now().strftime('%Y-%m-%d')} | {stats['solved']} | {stats['tier']} | {stats['rating']} | {stats['rank']} |"
+        new_boj = (
+            "| 날짜       | 총 푼 문제 | 티어      | 레이팅 | 순위   |\n"
+            "| ---------- | ---------- | --------- | ------ | ------ |\n"
+            f"| {datetime.now().strftime('%Y-%m-%d')} | {stats['solved']} | {stats['tier']} | {stats['rating']} | {stats['rank']} |"
+        )
         content = before + start_boj + "\n" + new_boj + "\n" + end_boj + after
 
     with open(README_PATH, "w", encoding="utf-8") as f:
