@@ -5,6 +5,9 @@ on:
         - cron: "0 15 * * *" # UTC 15시 = 한국시간 자정
     workflow_dispatch: # 수동 실행도 가능
 
+permissions:
+    contents: write
+
 jobs:
     update:
         runs-on: ubuntu-latest
