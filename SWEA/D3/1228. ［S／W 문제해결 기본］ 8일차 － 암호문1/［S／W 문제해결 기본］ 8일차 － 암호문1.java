@@ -1,7 +1,6 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -14,11 +13,12 @@ import java.util.StringTokenizer;
  * 1. 원본 암호문 입력받기
  * 		1-1. int len으로 암호문 길이 입력받기
  * 		1-2. LinkedList<> password
- * 		1-3. StringTokenizer 로 저장하기
- * 2. 명령어 저장하기
- * 		2-1. 배열리스트 commands 생성
+ * 		1-3. StringTokenizer 로 공백기준으로 쪼개서 password에 저장하기
  * 
- * 3. commands 배열을 하나씩 돌면서 암호문 수정하기
+ * 2. 명령어 수행하기
+ * 		2-1. StringTokenizer로 받아서 .hasMoreTokens를 사용해 I가 나올 때만 password 수정
+ * 
+ * 3. .subList로 맨 앞 10개 자르기
  *
  */
 public class Solution {
@@ -37,7 +37,7 @@ public class Solution {
 			}
 			
 			
-			// 2. 명령어대로 삽입하기
+			// 2. 명령어 수행하기
 			int commandLen = Integer.parseInt(br.readLine());
 			st = new StringTokenizer(br.readLine());
 			
