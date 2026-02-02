@@ -1,107 +1,86 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Scanner;
-import java.io.FileInputStream;
 
 /**
  * 
- * @author Baekkwanyeol
- * @see public main() 
- * 1. 총 10개의 테스트 코드가 들어옴 
- * 2. 첫줄에는 코드 번호 
- * 3. 두번째 줄에는 16*16 미로가 들어옴 
- * 		3-1 0 은 통로 1 은 벽 2 는 시작점 3은 도착점
+ * @author seonyu
  * 
- * @see def public boolean bfs(int y,int x) 
- * 1. y,x 부터 시작해서 넓이 우선 탐색 진행 
- * 2. 탈출조건 3을 만나면 탈출
+ * @see #main(String[])
+ * 1. 입력받기
+ * 		1-1. 테스트케이스  번호 입력받기
+ * 		1-2. 16*16 배열 생성 -> maze
+ * 		1-3. 16*16 미로 입력받기 -> 2가 출발점, 3이 도착점
+ * 
+ * 2. 출발점의 좌표를 q에 넣고 BFS
+ * 		2-1. 현재 좌표가 3이라면 stop, 1출력 (가능)
+ * 		2-2. 아니라면 현재 좌표 q에 넣고 반복
+ * 		2-3. while 문 벗어나면 0출력(불가능)
  *
  */
 public class Solution {
-	public static boolean bfs(int s_y, int s_x, int[][] map) {
-
-		Deque<int[]> q = new ArrayDeque<>();
-		int[][] visited = new int[16][16];
-
-		q.addLast(new int[] { s_y, s_x });
-
-		while (!q.isEmpty()) {
-
-			int c_y;
-			int c_x;
-			int n_y;
-			int n_x;
-			int[] temp;
-			temp = q.pollFirst();
-			c_y = temp[0];
-			c_x = temp[1];
-
-			// 만약 3을 만나면 트루
-			if (map[c_y][c_x] == 3) {
-				return true;
-			}
-
+	public static void main(String[] args) throws NumberFormatException, IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		
+		for(int testcase = 1; testcase<=10; testcase++) {
 			
-
-			int[] dy = { -1, 1, 0, 0 };
-			int[] dx = { 0, 0, 1, -1 };
-
-			for (int i = 0; i < 4; i++) {
-				n_y = c_y + dy[i];
-				n_x = c_x + dx[i];
-
-				if (0 <= n_x && n_x < 16 && 0 <= n_y && n_y < 16) {
-					if (visited[n_y][n_x] == 0 && map[n_y][n_x] != 1) {
-						q.add(new int[] { n_y, n_x });
-						visited[n_y][n_x] = 1;
-
+			int[][] maze = new int[16][16];
+			boolean[][] visited = new boolean[16][16];
+			
+			int tc = Integer.parseInt(br.readLine());
+			int startX=0, startY=0, endX=0, endY=0;
+			
+			for(int r=0; r<16; r++) {
+				String line = br.readLine();
+				for (int c=0; c<16; c++) {
+				    // 문자를 숫자로 변환
+					int state = line.charAt(c) - '0'; 
+					if(state == 2) {
+						//System.out.println("출발점: "+ r + c);
+						startX = r;
+						startY = c;
+					}
+					if(state == 3) {
+						//System.out.println("도착점: "+ r + c);
+						endX = r;
+						endY = c;
+					}
+					maze[r][c] = state;
+				}
+			}
+			
+			Deque<int[]> q = new ArrayDeque<>();
+			q.offer(new int[] {startX, startY});
+			visited[startX][startY] = true;
+			
+			int[] dx = new int[] {0, 0, 1, -1};
+			int[] dy = new int[] {1, -1, 0, 0};
+			int answer = 0;
+			
+			while(!q.isEmpty()) {
+				int[] current = q.poll();
+				int x = current[0];
+				int y = current[1];
+				
+				if(x==endX && y==endY) {
+					answer = 1;
+					break;
+				}
+				
+				for(int i=0; i<4; i++) {
+					int nx = dx[i]+x;
+					int ny = dy[i]+y;
+					
+					if((0<=nx && nx<16) && (0<=ny && ny<16) && !visited[nx][ny] && (maze[nx][ny]!=1)) {
+						q.offer(new int[] {nx, ny});
+						visited[nx][ny] = true;
 					}
 				}
-
 			}
-
-		}
-
-		return false;
-	}
-
-	public static void main(String[] args) {
-		Scanner sc = new Scanner(System.in);
-		for (int test_case = 1; test_case <= 10; test_case++) {
 			
-			String testcase;
-			testcase = sc.next();
-			int[] start = { 0, 0 };
-			int[] end = { 0, 0 };
-			int[][] map = new int[16][16];
-
-			for (int i = 0; i < map.length; i++) {
-				char[] line = new char[16];
-				line = sc.next().toCharArray();
-				for (int j = 0; j < line.length; j++) {
-					int number;
-					number = Character.getNumericValue(line[j]);
-					map[i][j] = number;
-					if (number == 2) {
-						start[0] = i;
-						start[1] = j;
-					} else if (number == 3) {
-						end[0] = i;
-						end[1] = j;
-					}
-
-				}
-
-			}
-			StringBuffer sb = new StringBuffer();
-			
-			sb.append("#"+testcase+" ");
-			
-			sb.append(bfs(start[0],start[1],map)?1:0);
-			
-			System.out.println(sb.toString());
-
+			System.out.println("#"+tc+" "+answer);
 		}
 	}
-
 }
