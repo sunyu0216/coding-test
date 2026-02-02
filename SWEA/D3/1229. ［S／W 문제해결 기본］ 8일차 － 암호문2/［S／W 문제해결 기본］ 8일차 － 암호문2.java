@@ -16,7 +16,9 @@ import java.util.StringTokenizer;
  * 		1-3. StringTokenizer 로 공백기준으로 쪼개서 password에 저장하기
  * 
  * 2. 명령어 수행하기
- * 		2-1. StringTokenizer로 받아서 .hasMoreTokens를 사용해 I가 나올 때만 password 수정
+ * 		2-1. StringTokenizer로 받아서 .hasMoreTokens를 사용
+ * 		2-2. I가 나올 때만 password 수정
+ * 		2-3. D가 나오면 삭제! 
  * 
  * 3. .subList로 맨 앞 10개 자르기
  *
