@@ -6,18 +6,18 @@ import java.util.StringTokenizer;
 /**
  * 
  * @author seonyu
- * SWEA 5215. 햄버거 다이어트
+ * SWEA 5215. 햄버거 다이어트 (부분집합)
  * 
  * 
  * 1. 입력받기
  * 	1-1. 재료 개수, 최대 칼로리
  * 	1-2. 각 재료마다 점수와 칼로리를 각각의 배열로 입력받기
  * 
- * 2. 모든 조합의 점수 중 최고 점수를 찾는 함수
- * 	2-1. 재료를 다 순회하며,
- * 	2-2. 현재 만들어진 햄버거의 점수가 최고 점수를 넘는다면 갱신
- * 	2-3. 기저조건: 현재 모든 재료를 순회했다면 종료
- * 	2-4. 새로 넣을 재료의 칼로리가 최대 칼로리를 넘지 않을 경우에 이 재료를 넣어준다.
+ * 2. 재료를 순회하면서, 이 재료를 넣을지 말지 결정
+ * 	2-1. 기저조건1: 현재 칼로리가 최대 칼로리를 넘는다면, 종료
+ * 	2-2. 기저조건2: 모든 재료를 순회했다면, 점수가 최대 점수보다 낮다면 갱신
+ * 	2-3. 이 재료를 넣는 경우의 재귀 호출
+ * 	2-4. 이 재료를 넣지 않는 경우의 재귀 호출
  * 
  * 3. 최고의 점수 출력
  *
@@ -28,6 +28,7 @@ public class Solution {
 	static int maxCalorie;
 	static int[] IngredientScore;
 	static int[] IngredientCalorie;
+	static boolean[] isSelected;
 	static int bestScore;
 	
 	public static void main(String[] args) throws NumberFormatException, IOException {
@@ -48,31 +49,32 @@ public class Solution {
 				IngredientCalorie[i] = Integer.parseInt(st.nextToken());
 			}
 			
+			isSelected = new boolean[IngredientNum];
 			bestScore = 0;
-			combination(0, 0, 0);
+			subset(0, 0, 0);
 			
 			// 결과 출력
             System.out.println("#" + t + " " + bestScore);
 			
 		}
 	}
-	static void combination(int currentCalorie, int currentScore, int startIdx) {
-		
-		if (currentScore > bestScore) {
-            bestScore = currentScore;
-        }
+	static void subset(int idx, int currentCalorie, int currentScore) {
 
-        // 기저 조건: 모든 재료를 다 훑었다면 종료
-        if (startIdx == IngredientNum) {
+		// 기저조건 1: 최대 칼로리를 넘는다면 종료
+		if(currentCalorie > maxCalorie) {
+			return;
+		}
+        // 기저 조건2: 모든 재료를 다 훑었다면 종료
+        if (idx == IngredientNum) {
+        	if(currentScore>bestScore) {
+        		bestScore = currentScore;
+        	}
             return;
         }
 		
-		for(int idx=startIdx; idx<IngredientNum; idx++) {
-			if(IngredientCalorie[idx] + currentCalorie <= maxCalorie) {
-				combination(IngredientCalorie[idx] + currentCalorie, IngredientScore[idx] + currentScore, idx+1);
-				
-			}
-		}
+		subset(idx+1, currentCalorie+IngredientCalorie[idx], currentScore+IngredientScore[idx]);
+            		
+        subset(idx+1, currentCalorie, currentScore);
 	}
 
 }
