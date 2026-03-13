@@ -33,7 +33,7 @@ public class Main {
 		int num = Integer.parseInt(br.readLine());
 		int[] ascending = new int[num];
 		int[] power = new int[num];
-		int totalCnt = 0;
+		long totalCnt = 0;
 		
 		StringTokenizer st = new StringTokenizer(br.readLine());
 		for(int i=0; i<num; i++) {
@@ -47,7 +47,7 @@ public class Main {
 			int cnt = 0;
 			
 			if(pre <= nxt) { // 원래 숫자를 비교하면 앞 숫자보다 큼
-				int changedPre = pre;
+				long changedPre = pre;
 				while(changedPre*2 <= nxt) { // 조건문 주의: pre에 2를 몇 번곱해야 nxt를 넘지 않는 최대치가 될까?
 					changedPre *= 2;
 					cnt++;
@@ -55,7 +55,7 @@ public class Main {
 				power[i] = Math.max(0, power[i-1]-cnt);
 				//System.out.println(nxt+"에 2를 "+power[i]+" 만큼 곱했더니 "+pre+" 에 "+power[i-1]+"만큼 2를 곱한 수 보다 커지거나 같아짐.");
 			}else { // 원래 숫자를 비교해도 앞 숫자보다 작음
-				int changedNxt = nxt;
+				long changedNxt = nxt;
 				while(changedNxt < pre) { // 조건문 주의: nxt가 pre보다 커지기 위한 최소 횟수
 					changedNxt *= 2;
 					cnt++;
