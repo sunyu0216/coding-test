@@ -73,10 +73,6 @@ public class Main {
 				}
 			}
 		}
-		// 팀 개수를 세기 위해 다시 한번 자신의 팀을 찾아가기
-		for(int stu=1; stu<studentNum+1; stu++) {
-			findTeam(stu);
-		}
 		
 		
 		int answer = 0;
