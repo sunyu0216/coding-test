@@ -1,43 +1,39 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 /**
  * 
  * @author seonyu
- * SWEA 1247. [S/W 문제해결 응용] 3일차 - 최적 경로
+ * SWEA 1247. 최적 경로
  * 
  * 1. 입력받기
  * 	1-1. 테스트케이스 개수 T
  * 	1-2. 고객의 수 customerNum
- * 	1-3. 좌표들 pos[customerNum+2][2]
- * 	1-4. 전체 맵 map[100][100]
+ * 	1-3. 회사의 좌표 companyX, companyY / 집의 좌표 homeX, homeY / 고객의 좌표 customer[][2]
  * 
- * 2. DFS를 활용해 고객의 집을 방문할 순서를 정하기
- * 	2-1. 기저조건: 모든 집의 방문 순서를 정했다면 
- * 		2-1-1. 현재 마지막 고객부터 집까지의 거리 더해서 현재 최종 거리를 구하기
- * 		2-1-2. 최소 거리와 비교 후 갱신
+ * 2. 외판원 순회 알고리즘 - dp[현재고객][방문한 상태] = 현재 방문한 상태를 거쳐 현재 고객까지 왔을때 남은 고객들을 다 도는 최소 비용
+ * 	2-1. 기저조건: 모든 도시를 다 방문했다면 => (mask == (1<<고객 수)-1)
+ * 		2-1-1. return 마지막 고개게서 집까지의 거리
+ * 	2-2. 모든 고객을 순회하며,
+ * 		2-2-1. 해당 고객을 이미 방문했는지 검사 => (방문상태 & (1<<현재 고객 번호) == 0) 방문안했다는 뜻
+ * 			2-2-1-1. 방문하지 않았다면 재귀호출(해당 고객, 현재 방문상태에 해당 고객 추가)
+ * 			2-2-1-2. 현재 고객에서 해당고객까지의 거리 dist
+ * 			2-2-1-3. 그리고 dp[현재고객][방문상태] 값을 dist+재귀호출리턴값 과 비교 후 더 작은 것으로 갱신
+ * 		2-2-2. 계속해서 고객으로 갈 수 있는 여러 후보지들을 다 탐색
  * 
- * 	2-2. 가지치기: 현재까지의 거리가 현재 최소거리보다 크거나 같다면 return
- * 
- * 	2-3. 재귀호출
- * 		2-3-1. 총 고객의 수만큼 반복문을 돌리며, 방문 안한집이라면,
- * 		2-3-2. 현재 고객의 집 방문처리
- * 		2-3-3. 현재 고객의 집 좌표, 현재 고객의 집 순번, 현재 고객 집까지의 거리와 함께 재귀 호출
- * 		2-3-4. 방문처리 백트래킹
+ * 	2-3.
  *
  */
 public class Solution {
 	static int T;
 	static int customerNum;
-	static int companyX;
-	static int companyY;
-	static int homeX;
-	static int homeY;
-	static int[][] customerPos;
-	static int minDis;
-	static boolean[] visited;
+	static int companyX, companyY;
+	static int homeX, homeY;
+	static int[][] customer;
+	static int[][] dp;
 	
 	public static void main(String[] args) throws NumberFormatException, IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -45,8 +41,8 @@ public class Solution {
 		
 		for(int t=1; t<=T; t++) {
 			customerNum = Integer.parseInt(br.readLine());
-			customerPos = new int[customerNum][2];
-			
+			customer = new int[customerNum][2];
+					
 			StringTokenizer st = new StringTokenizer(br.readLine());
 			
 			companyX = Integer.parseInt(st.nextToken());
@@ -54,45 +50,59 @@ public class Solution {
 			homeX = Integer.parseInt(st.nextToken());
 			homeY = Integer.parseInt(st.nextToken());
 			
-			for(int c=0; c<customerNum; c++) {
-				customerPos[c][0] = Integer.parseInt(st.nextToken());
-				customerPos[c][1] = Integer.parseInt(st.nextToken());
+			for(int i=0; i<customerNum; i++) {
+				customer[i][0] = Integer.parseInt(st.nextToken());
+				customer[i][1] = Integer.parseInt(st.nextToken());
+			}// 입력끝
+			
+			dp = new int[customerNum][1<<customerNum];
+			for(int i=0; i<customerNum; i++) Arrays.fill(dp[i], -1);
+			
+			int answer = 100000000;
+
+			// 모든 고객(i)을 첫 번째 방문지로 시도해보기
+			for (int i = 0; i < customerNum; i++) {
+			    // 회사 -> i번 고객까지의 거리
+			    int startDist = Math.abs(companyX - customer[i][0]) + Math.abs(companyY - customer[i][1]);
+			    
+			    // (회사->i 거리) + (i부터 나머지 다 돌고 집에 가는 거리)
+			    int midDist = TSP(i, 1<<i);
+			    
+			    answer = Math.min(answer, startDist + midDist);
 			}
+			System.out.println("#" + t + " " + answer);
 			
-			minDis = Integer.MAX_VALUE;
-			visited = new boolean[customerNum];
-			
-			findPath(companyX, companyY, 0, 0);
-			
-			System.out.println("#"+t+" "+minDis);
 		}
 	}
 	
-	public static void findPath(int lastX, int lastY, int currDis, int idx) {
-		// 2-1. 기저조건: 모든 집의 방문 순서를 정했다면 
-		if(idx == customerNum) {
-			// 2-1-1. 현재 마지막 고객부터 집까지의 거리 더해서 현재 최종 거리를 구하기
-			int distance = Math.abs(lastX- homeX) + Math.abs(lastY - homeY);
-			
-			// 2-1-2. 최소 거리와 비교 후 갱신
-			minDis = Math.min(minDis, currDis+distance);
-			return;
+	public static int TSP(int customerId, int visited) {
+		if(visited == (1<<customerNum)-1) {
+			int dist = Math.abs(customer[customerId][0] - homeX) + Math.abs(customer[customerId][1] - homeY); // 마지막 고객에서 집까지의 거리
+			return dist;
 		}
 		
-		// 2-2. 가지치기: 현재까지의 거리가 현재 최소거리보다 크다면 return
-		if(currDis >= minDis) {
-			return;
-		}
 		
-		// 2-3. 재귀호출
-		for(int i=0; i<customerNum; i++) {
-			if(!visited[i]) {
-				visited[i] = true;
-				int distance = Math.abs(lastX- customerPos[i][0]) + Math.abs(lastY - customerPos[i][1]);
-				findPath(customerPos[i][0], customerPos[i][1], currDis+distance, idx+1);
-				visited[i] = false;
-			}
-		}
+	    if (dp[customerId][visited] != -1) {
+	        return dp[customerId][visited];
+	    }
+	    
+		
+		// 최솟값을 찾기 위해 아주 큰 값으로 초기화
+	    int minState = 987654321; 
+
+	    for (int i = 0; i < customerNum; i++) {
+	        if ((visited & (1 << i)) == 0) {
+	            int dist = Math.abs(customer[customerId][0] - customer[i][0]) + Math.abs(customer[customerId][1] - customer[i][1]);
+	            int result = dist + TSP(i, visited | (1 << i));
+	            
+	            // 그중 최솟값 선택
+	            minState = Math.min(minState, result);
+	        }
+	    }
+	    
+	    
+	    return dp[customerId][visited] = minState;
+	    
 	}
 
 }
