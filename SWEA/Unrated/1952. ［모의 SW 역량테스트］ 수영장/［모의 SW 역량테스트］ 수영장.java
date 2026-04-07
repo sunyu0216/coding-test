@@ -8,82 +8,56 @@ import java.util.StringTokenizer;
  * @author seonyu
  * SWEA 1952. 수영장
  * 
- * 1. 입력받기
- * 	1-1. 테스트케이스 입력받기 T
- * 	1-2. 이용권 가격 입력받기 - 순서대로 1일권, 1달권, 3달권, 1년권
- * 		price[4]
- * 	1-3. 이용계획 입력받기
- * 		plan[12]
+ * 1. 입력받기 및 변수
+ * 	1-1. 테스트케이스 개수 T
+ * 	1-2. 이용권 가격들 cost[]
+ * 	1-3. 12개월 이용 계획 plan[]
  * 
- * 
- * 2. 백트레킹 함수
- * 	2-0. 가지치기: 이미 최솟값보다 비싸졌다면 더 볼 필요 없음
- * 
- * 	2-1. 기저조건: 12개월의 모든 이용권을 배정한 경우
- * 		2-1-1. 현재 이용 금액보고 총 이용금액 갱신
- * 
- * 	2-2. 현재 달의 이용계획이 0일 이라면, 넘기기
- * 	2-3. 1일 이용권을 적용하는 경우 날짜만큼 곱해서 이용 금액에 더해주기
- * 	2-4. 3달권을 적용하는 경우 idx를 3달만큼 늘려주기
+ * 2. DP -> dp[i] = i번째 달까지의 최소 이용 금액
+ * 	2-1. dp[i] = min(1일권 사용, 1달권 사용, 3달권 사용)
+ * 	2-2. dp[1] = min(1일권, 1달권) -> min(더 작은 것, 3달권) *혹시 3달권이 1원 이럴수도 있으니까
+ * 	2-3. dp[2] = min(1일권, 1달권) -> "
+ * 	2-4. dp[3] = min(dp[2]+1일권, dp[2]+한달권) -> min(더 작은 것, dp[0]+3달권)
+ * 	2-5. dp[12]가 되면 min(dp[12], 1년권을 비교하기)
+ *
  */
 public class Solution {
-	
-	static int[] price = new int[4];
-	static int[] plan = new int[12];
-	static int minPrice;
-	
 	public static void main(String[] args) throws NumberFormatException, IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st;
-		
 		int T = Integer.parseInt(br.readLine());
+		int[] cost;
+		int[] plan;
+		int[] dp;
 		
 		for(int t=1; t<=T; t++) {
-			st = new StringTokenizer(br.readLine());
-			for(int p=0; p<4; p++) {
-				price[p] = Integer.parseInt(st.nextToken());
+			cost = new int[4];
+			plan = new int[13];
+			dp = new int[13]; 
+			
+			StringTokenizer st = new StringTokenizer(br.readLine());
+			for(int i=0; i<4; i++) {
+				cost[i] = Integer.parseInt(st.nextToken());
 			}
 			
 			st = new StringTokenizer(br.readLine());
-			for(int p=0; p<12; p++) {
-				plan[p] = Integer.parseInt(st.nextToken());
+			for(int i=1; i<13; i++) {
+				plan[i] = Integer.parseInt(st.nextToken());
 			}
 			
-			// 1. 초기 최솟값을 1년권 가격으로 설정 (가장 큰 기준점)
-            minPrice = price[3];
-            
-            // 2. 백트래킹 시작
-            backtracking(0, 0);
-
-            System.out.println("#" + t + " " + minPrice);
+			dp[0] = 0; // 0번째 달 이용요금 0원
+			
+			for(int i=1; i<13; i++) {
+				dp[i] = Math.min(dp[i-1]+(cost[0]*plan[i]), dp[i-1]+cost[1]); // 1일권과 한달권 중 더 작은 거 선택
+				
+				if(i>=3) {
+					dp[i] = Math.min(dp[i], dp[i-3]+cost[2]); // 현재 이용값과 3달권 중 뭐가 더 싼지 선택
+				}else {
+					dp[i] = Math.min(dp[i], cost[2]); // 3달권이 너무 싸서 1월부터 적용하는 경우
+				}
+			}
+			int answer = Math.min(dp[12], cost[3]);
+			
+			System.out.println("#"+t+" "+ answer);
 		}
 	}
-	
-	static void backtracking(int idx, int currentPrice) {
-		// 가지치기: 이미 최솟값보다 비싸졌다면 더 볼 필요 없음
-        if (currentPrice >= minPrice) return;
-        
-        // 기저조건: 12개월의 모든 이용권을 배정한 경우
-		if(idx >= 12) {
-			minPrice = Math.min(minPrice, currentPrice);
-			return;
-		}
-		
-		if(plan[idx] == 0) {
-			backtracking(idx+1, currentPrice);
-		}else {
-			// 시나리오 1: 1일권 적용하는 경우
-			backtracking(idx+1, currentPrice+plan[idx]*price[0]);
-			
-			// 시나리오 2: 1달권 적용하는 경우
-			backtracking(idx+1, currentPrice+price[1]);
-			
-			// 시나리오 3: 3달권 적용하는 경우
-			backtracking(idx+3, currentPrice+price[2]);
-			
-			// 1년 권은 이미 minPrice에 있으므로 pass
-			
-		}
-	}
-
 }
