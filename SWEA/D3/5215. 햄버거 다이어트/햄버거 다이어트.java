@@ -6,75 +6,64 @@ import java.util.StringTokenizer;
 /**
  * 
  * @author seonyu
- * SWEA 5215. 햄버거 다이어트 (부분집합)
- * 
+ * SWEA 5215. 햄버거 다이어트
  * 
  * 1. 입력받기
- * 	1-1. 재료 개수, 최대 칼로리
- * 	1-2. 각 재료마다 점수와 칼로리를 각각의 배열로 입력받기
+ * 	1-1. 테스트케이스 개수 T
+ * 	1-2. 재료의 수 ingreNum, 칼로리제한 maxCalorie
+ * 	1-3. 재료에 대한 민기의 맛 점수와 칼로리 ingredient[][2]
  * 
- * 2. 재료를 순회하면서, 이 재료를 넣을지 말지 결정
- * 	2-1. 기저조건1: 현재 칼로리가 최대 칼로리를 넘는다면, 종료
- * 	2-2. 기저조건2: 모든 재료를 순회했다면, 점수가 최대 점수보다 낮다면 갱신
- * 	2-3. 이 재료를 넣는 경우의 재귀 호출
- * 	2-4. 이 재료를 넣지 않는 경우의 재귀 호출
+ * [흐름]
+ * 외판원순회..? 는 순서가 중요할때 쓰는데 이건 순서가 중요하지 않음. 칼로리에 따른 최대의 맛 점수를 찾는게 중요
+ * dp[칼로리] = 현재 칼로리가 이럴때 최대의 맛 점수
  * 
- * 3. 최고의 점수 출력
+ * dp[1000] = dp[200] + dp[300] + dp[500] 일 수도 있고 / 그냥 dp[1000]이 더 클수도 있음.
+ * 재료 1에 대해 제한 칼로리부터 재료1까지 돌기?
+ * 
+ * 2. DP 알고리즘 - 각 재료를 순회하며
+ * 	2-1. 최대 칼로리부터 현재재료의 칼로리까지 감소시키면서, currC
+ * 		2-1-1. dp[currC] = Math.max(dp[currC], dp[currC - 현재재료 칼로리]+현재재료 맛 점수)
+ * 
+ * 3. dp[maxCalorie]를 출력하면 됨.
  *
  */
 public class Solution {
-	
-	static int IngredientNum;
+	static int T;
+	static int ingreNum;
 	static int maxCalorie;
-	static int[] IngredientScore;
-	static int[] IngredientCalorie;
-	static boolean[] isSelected;
-	static int bestScore;
+	static int[][] ingredient;
+	static int[] dp;
 	
 	public static void main(String[] args) throws NumberFormatException, IOException {
-		
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		int T = Integer.parseInt(br.readLine().trim());
+		T = Integer.parseInt(br.readLine());
 		
 		for(int t=1; t<=T; t++) {
 			StringTokenizer st = new StringTokenizer(br.readLine());
-			IngredientNum = Integer.parseInt(st.nextToken());
+			ingreNum = Integer.parseInt(st.nextToken());
 			maxCalorie = Integer.parseInt(st.nextToken());
+			ingredient = new int[ingreNum][2];
 			
-			IngredientScore = new int[IngredientNum];
-			IngredientCalorie = new int[IngredientNum];
-			for(int i=0; i<IngredientNum; i++) {
+			for(int i=0; i<ingreNum; i++) {
 				st = new StringTokenizer(br.readLine());
-				IngredientScore[i] = Integer.parseInt(st.nextToken());
-				IngredientCalorie[i] = Integer.parseInt(st.nextToken());
+				ingredient[i][0] = Integer.parseInt(st.nextToken());
+				ingredient[i][1] = Integer.parseInt(st.nextToken());
+			} // 입력 끝
+			
+			dp = new int[maxCalorie+1];
+			
+			for(int[] curr: ingredient) {
+				int currScore = curr[0];
+				int currCalorie = curr[1];
+				
+				for(int cc=maxCalorie; cc>=currCalorie; cc--) {
+					dp[cc] = Math.max(dp[cc], dp[cc-currCalorie]+currScore);
+				}
 			}
 			
-			isSelected = new boolean[IngredientNum];
-			bestScore = 0;
-			subset(0, 0, 0);
-			
-			// 결과 출력
-            System.out.println("#" + t + " " + bestScore);
-			
+			System.out.println("#"+t+" "+dp[maxCalorie]);
+				
 		}
-	}
-	static void subset(int idx, int currentCalorie, int currentScore) {
-
-		// 기저조건 1: 최대 칼로리를 넘는다면 종료
-		if(currentCalorie > maxCalorie) {
-			return;
-		}
-        // 기저 조건2: 모든 재료를 다 훑었다면 종료
-        if (idx == IngredientNum) {
-        	if(currentScore>bestScore) {
-        		bestScore = currentScore;
-        	}
-            return;
-        }
-		
-		subset(idx+1, currentCalorie+IngredientCalorie[idx], currentScore+IngredientScore[idx]);
-            		
-        subset(idx+1, currentCalorie, currentScore);
 	}
 
 }
